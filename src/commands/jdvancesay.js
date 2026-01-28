@@ -21,7 +21,7 @@ module.exports = {
             return interaction.editReply({ content: '❌ Text is too long! Please keep it under 200 characters.' });
         }
 
-        const fishApiKey = process.env.FISHAUDIO_API;
+        const fishApiKey = config.fishAudioApiKey;
         if (!fishApiKey) {
             return interaction.editReply({
                 content: '❌ Fish Audio API key is not configured. Please contact the bot administrator.'

@@ -33,6 +33,7 @@ class DarkMAGABot {
         // Store context in client for easy access
         this.client.database = this.database;
         this.client.config = config;
+        this.client.commandHandler = this.commandHandler;
     }
 
     async initialize() {

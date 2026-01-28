@@ -1,4 +1,5 @@
-const { Events } = require('discord.js');
+const { Events, AttachmentBuilder } = require('discord.js');
+const { generateSpeech } = require('../utils/fishAudio');
 
 module.exports = {
     name: Events.InteractionCreate,
@@ -57,12 +58,31 @@ module.exports = {
                     await interaction.reply({ content: '❌ Failed to update roles.', ephemeral: true });
                 }
             }
-            // TTS Buttons (ask* commands) - Placeholder check
+            // TTS Buttons (ask* commands)
             else if (interaction.customId.startsWith('speak_')) {
-                // Implement or delegate to specific handler if needed
-                // For now, let's keep it here or separate file
-                console.log(`TTS Button clicked: ${interaction.customId}`);
-                await interaction.reply({ content: '🔊 TTS generation starting... (Placeholder)', ephemeral: true });
+                const parts = interaction.customId.split('_');
+                const character = parts[1]; // speak_character_id
+
+                // Get the text from the embed
+                const embed = interaction.message.embeds[0];
+                if (!embed || !embed.description) {
+                    return interaction.reply({ content: '❌ Could not find text to speak.', ephemeral: true });
+                }
+
+                await interaction.deferReply();
+
+                try {
+                    const audioBuffer = await generateSpeech(embed.description, character);
+                    const attachment = new AttachmentBuilder(audioBuffer, { name: `${character}_speech.mp3` });
+
+                    await interaction.editReply({
+                        content: `🔊 **${character.toUpperCase()}** says...`,
+                        files: [attachment]
+                    });
+                } catch (error) {
+                    console.error('TTS Error:', error);
+                    await interaction.editReply({ content: '❌ Failed to generate speech. API key might be missing or invalid.' });
+                }
             }
         }
     },
